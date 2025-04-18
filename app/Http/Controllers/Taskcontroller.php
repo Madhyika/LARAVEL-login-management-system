@@ -4,17 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\Task;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class TaskController extends Controller
 {
     // Get all tasks for the authenticated user
-    public function index(Request $request)
+    public function index(Request $request): JsonResponse
     {
-        return $request->user()->tasks()->latest()->get();
-    }
+        return response()->json(Task::all());
+        }
 
     // Store a new task
-    public function store(Request $request)
+    public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
             'title' => 'required|string|max:255',
@@ -27,8 +28,10 @@ class TaskController extends Controller
     }
 
     // Update an existing task
-    public function update(Request $request, Task $task)
+    public function update(Request $request, $id): JsonResponse
     {
+        $task = Task::findOrFail($id);
+
         // Optional: check ownership
         if ($task->user_id !== $request->user()->id) {
             return response()->json(['error' => 'Unauthorized'], 403);
@@ -50,8 +53,9 @@ class TaskController extends Controller
     }
       
     // Delete a task
-    public function destroy(Request $request, Task $task)
+    public function destroy(Request $request, $id): JsonResponse  
     {
+        $task = Task::findOrFail($id);
         if ($task->user_id !== $request->user()->id) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }

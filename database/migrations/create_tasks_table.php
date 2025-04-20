@@ -11,14 +11,18 @@ public function up()
     Schema::create('tasks', function (Blueprint $table) {
         $table->id();
         $table->foreignId('user_id')->constrained()->onDelete('cascade');
+        $table->foreignId('parent_id')->nullable()->constrained()->onDelete('cascade');
         $table->string('title');
-        $table->text('description')->nullable();
+        $table->text('content')->nullable();
+        // $table->text('content');
         $table->boolean('completed')->default(false);
         $table->timestamps();
     });
 }
 public function down()
-    {
-        Schema::dropIfExists('tasks');
-    }
+{
+    Schema::table('tasks', function (Blueprint $table) {
+        $table->dropColumn('content');
+    });
+}
 };

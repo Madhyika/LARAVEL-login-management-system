@@ -5,6 +5,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TaskController;
+use App\Http\Controllers\NoteController;
+use App\Http\Controllers\Auth\LoginController;
 
 // Public Routes
 Route::post('/register', function (Request $request) {
@@ -32,10 +34,6 @@ Route::post('/login', function (Request $request) {
     $user = User::where('email', $request->login)
     ->orWhere('name', $request->login) 
     ->first();
-
-    // Log::info('Login attempt for: ' . $request->login);
-    // Log::info('Field type used: ' . $fieldType);
-    // Log::info('Found user: ' . json_encode($user));
 
     if (!$user || !Hash::check($request->password, $user->password)) {
         return response()->json(['message' => 'Invalid credentials'], 401);
@@ -66,3 +64,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     Route::put('/tasks/update/{id}', [TaskController::class, 'update']); // Update a task
     Route::delete('/tasks/delete/{id}', [TaskController::class, 'destroy']); // Delete a task
     });
+
+    // Note Routes
+    Route::get('/notes/get', [NoteController::class, 'index']);
+    Route::post('/notes/create', [NoteController::class, 'store']);
+    Route::get('/notes/{id}', [NoteController::class, 'show']);
+    Route::put('/notes/{id}', [NoteController::class, 'update']);
+    Route::delete('/notes/{id}', [NoteController::class, 'destroy']);

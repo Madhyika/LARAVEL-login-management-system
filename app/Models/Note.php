@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 
-class Task extends Model
+class Note extends Model
 {
     use HasFactory;
 
@@ -18,25 +18,14 @@ class Task extends Model
     protected $fillable = [
         'title',
         'content',
-        'completed',
         'user_id',
-        'parent_id'
     ];
 
     /**
-     * Get the user that owns the task.
+     * Get the user that owns the note.
      */
     public function user()
     {
         return $this->belongsTo(User::class);
-    }
-
-    public function children()
-    {
-        return $this->hasMany(Task::class,'parent_id');
-    } 
-    public function parent()
-    {
-        return $this->belongsTo(Task::class,'parent_id');
     }
 }

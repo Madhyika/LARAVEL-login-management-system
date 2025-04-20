@@ -32,7 +32,7 @@ class TaskController extends Controller
     $task = $request->user()->tasks()->create($validated);
 
     // Debug task data after saving it
-    dd($task->toArray());  // This will dump task data after it’s been saved.
+    ($task->toArray());  // This will dump task data after it’s been saved.
 
     return response()->json([
         'status' => 'success',

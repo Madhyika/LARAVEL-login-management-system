@@ -10,14 +10,13 @@ public function up()
 {
     Schema::create('tasks', function (Blueprint $table) {
         $table->id();
-        $table->foreignId('user_id')->constrained()->onDelete('cascade');
-        $table->foreignId('parent_id')->nullable()->constrained()->onDelete('cascade');
         $table->string('title');
         $table->text('content')->nullable();
-        // $table->text('content');
-        $table->boolean('completed')->default(false);
+        $table->foreignId('user_id')->constrained(); // Assuming you want to link tasks to users
+        $table->foreignId('parent_id')->nullable()->constrained('tasks'); // Parent-child relationship for tasks
         $table->timestamps();
     });
+    
 }
 public function down()
 {

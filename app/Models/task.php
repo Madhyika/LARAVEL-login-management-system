@@ -20,7 +20,8 @@ class Task extends Model
         'content',
         'completed',
         'user_id',
-        'parent_id'
+        'parent_id',
+        'done',
     ];
 
     /**

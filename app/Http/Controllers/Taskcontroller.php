@@ -26,6 +26,7 @@ class TaskController extends Controller
         'title' => 'required|string|max:255',
         'content' => 'nullable|string',
         'parent_id' => 'nullable|exists:tasks,id',
+        'done' => 'boolean', 
     ]);
 
     // Create the task using the validated data
@@ -65,7 +66,7 @@ class TaskController extends Controller
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'nullable|string',
-            // 'completed' => 'boolean',
+            'done' => 'boolean',
             'parent_id' => 'nullable|exists:tasks,id',
         ]);
 

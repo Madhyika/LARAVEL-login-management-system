@@ -12,6 +12,7 @@ public function up()
         $table->id();
         $table->string('title');
         $table->text('content')->nullable();
+        $table->boolean('done')->default(false);
         $table->foreignId('user_id')->constrained(); // Assuming you want to link tasks to users
         $table->foreignId('parent_id')->nullable()->constrained('tasks'); // Parent-child relationship for tasks
         $table->timestamps();
@@ -22,6 +23,8 @@ public function down()
 {
     Schema::table('tasks', function (Blueprint $table) {
         $table->dropColumn('content');
+        $table->dropColumn('done');
+
     });
 }
 };

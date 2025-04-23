@@ -8,17 +8,19 @@ use Illuminate\Http\JsonResponse;
 
 class TaskController extends Controller
 {
-    // Get all notes for the authenticated user
+    // Get all task for the authenticated user
     public function index(Request $request): JsonResponse
     {
-        $tasks = $request->user()->tasks()->with('children')->get(); // Optional: eager load children
+        // $tasks = $request->user()->tasks()->with('children')->get(); // Optional: eager load children
+        $tasks = $request->user()->tasks()->whereNull('parent_id')->with('children')->get();
+        // ->orderBy('id', 'desc')
         return response()->json([
             'status' => 'success',
             'data' => $tasks
         ]);
     }
 
-    // Store a new note
+    // Store a new task
     public function store(Request $request): JsonResponse
 {
     // Validate incoming request data
@@ -29,6 +31,16 @@ class TaskController extends Controller
         'done' => 'boolean', 
     ]);
 
+    if (!empty($validated['parent_id'])) {
+        $parentTask = Task::find($validated['parent_id']);
+        // if ($parentTask && $parentTask->parent_id !== null) {
+        if ($parentTask->parent_id){
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Subtasks cannot have their own subtasks.'
+            ], 400);
+        }
+    }
     // Create the task using the validated data
     $task = $request->user()->tasks()->create($validated);
 
@@ -41,7 +53,7 @@ class TaskController extends Controller
     ], 201);
 }
 
-    // Show a specific note
+    // Show a specific task
     public function show(Request $request, $id): JsonResponse
     {
         $task = Task::where('user_id', $request->user()->id)                    
@@ -54,7 +66,7 @@ class TaskController extends Controller
         ]);
     }
 
-    // Update an existing note
+    // Update an existing task
     public function update(Request $request, $id): JsonResponse
     {
         $task = Task::findOrFail($id);
@@ -78,7 +90,7 @@ class TaskController extends Controller
         ]);
     }
 
-    // Delete a note
+    // Delete a task
     public function destroy(Request $request, $id): JsonResponse
     {
         $task = Task::findOrFail($id);
@@ -91,7 +103,7 @@ class TaskController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Note deleted successfully'
+            'message' => 'Task deleted successfully'
         ]);
     }
 }

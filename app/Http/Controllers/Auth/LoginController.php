@@ -14,7 +14,7 @@ class LoginController extends Controller
     {
         $request->validate([
             'login' => 'required|string',
-            'password' => 'required|string',
+            'password' => 'required',
         ]);
     
         $user = User::where('email', $request->login)
@@ -45,4 +45,24 @@ class LoginController extends Controller
             'message' => 'Logged out successfully.'
         ]);
     }
+    public function updatePassword(Request $request)
+{
+    $request->validate([
+        'newPassword' => [
+            'required',
+            'string',
+            'min:8',
+            'regex:/[a-z]/',
+            'regex:/[A-Z]/',
+            'regex:/[0-9]/',
+            'regex:/[@$!%*#?&]/',
+        ],
+    ]);
+
+    $user = $request->user();
+    $user->password = Hash::make($request->newPassword);
+    $user->save();
+
+    return response()->json(['message' => 'Password updated successfully']);
+}
 }

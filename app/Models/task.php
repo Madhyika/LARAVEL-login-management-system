@@ -34,4 +34,16 @@ class Task extends Model
     {
         return $this->belongsTo(Task::class,'parent_id');
     }
+    public function scopeSearch($query, $search)
+{
+    if ($search) {
+        $query->where(function ($q) use ($search) {
+            $q->where('title', 'like', "%$search%")
+              ->orWhere('content', 'like', "%$search%");
+        });
+    }
+    return $query;
+}
+
+
 }

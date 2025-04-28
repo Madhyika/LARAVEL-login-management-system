@@ -10,11 +10,41 @@ class NoteController extends Controller
 {
     public function index(Request $request): JsonResponse
     {
-        $notes = $request->user()->notes()->with('children')->get();
+        $user = $request->user();
+        
+        $filters = json_decode($request->query('filters'), true);
+        $search = $request->query('search');
+        $perPage = $request->query('per_page', 5); // Default 10 notes per page
+        
+        // $query = $user->notes()->whereNull('parent_id');
+        $query = $user->notes();
+        
+        if (isset($filters['name']) && !empty($filters['name'])) {
+            $query->where(function ($q) use ($filters) {
+                $q->where('title', 'like', '%' . $filters['name'] . '%')
+                  ->orWhere('content', 'like', '%' . $filters['name'] . '%');
+            });
+        }
+        
+        
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', '%' . $search . '%')
+                  ->orWhere('content', 'like', '%' . $search . '%');
+            });
+        }
+       
+        
+        $notes = $query->orderBy('created_at', 'desc')->paginate($perPage);;
 
         return response()->json([
             'status' => 'success',
-            'data' => $notes
+            'data' => $notes,
+            'current_page' => $notes->currentPage(),
+            'last_page' => $notes->lastPage(),
+            'per_page' => $notes->perPage(),
+            'total' => $notes->total(),
+            
         ]);
     }
 

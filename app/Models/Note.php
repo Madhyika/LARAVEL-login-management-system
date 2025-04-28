@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\User;
 
 class Note extends Model
 {
@@ -29,5 +30,15 @@ class Note extends Model
     public function children()
     {
         return $this->hasMany(Note::class, 'parent_id');
+    }
+    public function scopeSearch($query, $search)
+    {
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%$search%")
+                  ->orWhere('content', 'like', "%$search%");
+            });
+        }
+        return $query;
     }
 }

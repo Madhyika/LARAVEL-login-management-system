@@ -8,17 +8,44 @@ use Illuminate\Http\JsonResponse;
 
 class TaskController extends Controller
 {
-    // Get all task for the authenticated user
-    public function index(Request $request): JsonResponse
-    {
-        // $tasks = $request->user()->tasks()->with('children')->get(); // Optional: eager load children
-        $tasks = $request->user()->tasks()->whereNull('parent_id')->with('children')->get();
-        // ->orderBy('id', 'desc')
-        return response()->json([
-            'status' => 'success',
-            'data' => $tasks
-        ]);
+   public function index(Request $request): JsonResponse
+{
+    $user = $request->user();
+    
+    $filters = json_decode($request->query('filters'), true);
+    $search = $request->query('search');
+    $perPage = $request->query('per_page', 5); // Default 5 tasks per page
+
+    $query = $user->tasks()->whereNull('parent_id');
+    
+    if (isset($filters['name']) && !empty($filters['name'])) {
+        $query->where(function ($q) use ($filters) {
+            $q->where('title', 'like', '%' . $filters['name'] . '%')
+              ->orWhere('content', 'like', '%' . $filters['name'] . '%');
+        });
     }
+    
+    if ($search) {
+        $query->where(function ($q) use ($search) {
+            $q->where('title', 'like', '%' . $search . '%')
+              ->orWhere('content', 'like', '%' . $search . '%');
+        });
+    }
+
+    
+    $tasks = $query->with('children')->get();
+    $tasks = $query->orderBy('created_at', 'desc')->paginate($perPage);;
+
+    return response()->json([
+        'status' => 'success',
+        'data' => $tasks,
+        'current_page' => $tasks->currentPage(),
+        'last_page' => $tasks->lastPage(),
+        'per_page' => $tasks->perPage(),
+        'total' => $tasks->total(),
+    ]);
+}
+
 
     // Store a new task
     public function store(Request $request): JsonResponse
@@ -33,7 +60,6 @@ class TaskController extends Controller
 
     if (!empty($validated['parent_id'])) {
         $parentTask = Task::find($validated['parent_id']);
-        // if ($parentTask && $parentTask->parent_id !== null) {
         if ($parentTask->parent_id){
             return response()->json([
                 'status' => 'error',
@@ -41,6 +67,7 @@ class TaskController extends Controller
             ], 400);
         }
     }
+    
     // Create the task using the validated data
     $task = $request->user()->tasks()->create($validated);
 
